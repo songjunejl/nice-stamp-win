@@ -1,0 +1,32 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# IDE
+.vs/
+.idea/
+*.swp
+
+# Build outputs
+publish/
+artifacts/
+
+# User-specific
+*.user
+*.rsuser
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+
+# Claude
+.claude/settings.local.json
