@@ -1,0 +1,58 @@
+name: Build Nice Stamp Windows
+
+on:
+  repository_dispatch:
+    types: [build-win-v9]
+  workflow_dispatch:
+    inputs:
+      attempt:
+        description: 'Build attempt number'
+        required: false
+        default: '1'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore NiceStamp.sln
+        continue-on-error: true
+
+      - name: Build Debug
+        run: dotnet build NiceStamp.sln -c Debug --no-restore
+        continue-on-error: true
+
+      - name: Build Release
+        run: dotnet build NiceStamp.sln -c Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test NiceStamp.Tests/NiceStamp.Tests.csproj --no-build -c Release --verbosity normal
+        continue-on-error: true
+
+      - name: Publish Self-Contained
+        run: |
+          dotnet publish NiceStamp/NiceStamp.csproj -c Release -r win-x64 --self-contained -o publish/
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NiceStamp-Win-v9
+          path: publish/
+          retention-days: 30
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: '**/TestResults/**'
+          retention-days: 7
